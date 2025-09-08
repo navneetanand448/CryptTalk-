@@ -69,7 +69,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
       otherMemberPublicKey: groupChat ? null : otherMember.publicKey,
     };
   });
-  console.log(transformedChats)
+  
   return res.status(200).json({
     success: true,
     chats: transformedChats,

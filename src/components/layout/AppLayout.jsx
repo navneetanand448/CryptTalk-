@@ -31,7 +31,7 @@ import {
   setNewMessagesAlert,
 } from "../../redux/reducers/chat";
 import { getOrSaveFromStorage } from "../../lib/features";
-import { DeleteChatMenu } from "../dailogs/DeleteChatMEnu";
+import { DeleteChatMenu } from "../dailogs/DeleteChatMenu";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
