@@ -20,6 +20,8 @@ import { Message } from "./models/message.js";
 import cors from "cors";
 import { v2 as cloudinary } from "cloudinary";
 import { socketAuthenticator } from "./middlewares/auth.js";
+import fs from "fs";
+import path from "path";
 
 import userRoute from "./routes/user.js";
 import chatRoute from "./routes/chat.js";
@@ -56,30 +58,38 @@ console.log(corseOption);
 
 app.set("io", io);
 
+// ------------------- CUSTOM LOGGING -------------------
+const logFile = path.join(process.cwd(), "logs.txt");
+
+const originalLog = console.log;
+console.log = function (...args) {
+  const message = args.map(a =>
+    typeof a === "object" ? JSON.stringify(a) : String(a)
+  ).join(" ");
+  const logLine = `[${new Date().toISOString()}] ${message}\n`;
+
+  fs.appendFileSync(logFile, logLine, "utf8"); // write to file
+  originalLog.apply(console, args); // keep normal console.log
+};
+
 //using midddlewares here
-
-
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corseOption));
 
-//logging the request
-app.use((req, res, next) => {
-  console.log("----- Incoming Request -----");
-  console.log("Method:", req.method);
-  console.log("URL:", req.originalUrl);
-  console.log("Headers:", req.headers);
-  if (req.body) console.log("Body:", req.body);
-  console.log("---------------------------\n");
-  next(); 
-});
-
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/chat", chatRoute);
 
+// ------------------- LOG VIEW ROUTE -------------------
 app.get("/", (req, res) => {
-  res.send("hello world");
+  fs.readFile(logFile, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send("Could not read logs");
+    }
+    res.send(`<pre>${data}</pre>`);
+  });
 });
+// ------------------------------------------------------
 
 io.use((socket, next) => {
   cookieParser()(socket.request, socket.request.res, async (err) => {
@@ -89,11 +99,9 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const user = socket.user;
-  // console.log(user)
   userSocketIDs.set(user._id.toString(), socket.id);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
-    
     const recipients = members
       .filter(member => member._id !== user._id.toString())
       .map(member => `${member.name} (ID: ${member._id})`);
@@ -118,7 +126,6 @@ io.on("connection", (socket) => {
     };
 
     const membersSocket = getSockets(members);
-    
 
     io.to(membersSocket).emit(NEW_MESSAGE, {
       chatId,
@@ -136,40 +143,35 @@ io.on("connection", (socket) => {
   });
 
   socket.on(START_TYPING, ({ members, chatId }) => {
-    // console.log("start - typing", chatId);
     const membersSockets = getSockets(members);
-
     socket.to(membersSockets).emit(START_TYPING, { chatId });
   });
 
   socket.on(STOP_TYPING, ({ members, chatId }) => {
-    // console.log("stop - typing", chatId);
     const membersSockets = getSockets(members);
-
     socket.to(membersSockets).emit(STOP_TYPING, { chatId });
   });
 
   socket.on(CHAT_JOINED, ({ userId, members }) => {
     onlineUsers.add(userId.toString());
-
     const membersSocket = getSockets(members);
     io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
   });
 
   socket.on(CHAT_LEAVED, ({ userId, members }) => {
     onlineUsers.delete(userId.toString());
-
     const membersSocket = getSockets(members);
     io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
   });
 
   socket.on("disconnect", () => {
-    console.log( user.name,"disconnected");
+    console.log(user.name, "disconnected");
     userSocketIDs.delete(user._id.toString());
     onlineUsers.delete(user._id.toString());
-    socket.broadcast.emit(ONLINE_USERS,Array.from(onlineUsers))
+    socket.broadcast.emit(ONLINE_USERS, Array.from(onlineUsers));
   });
 });
+
 app.use(errorMiddleware);
 
 server.listen(PORT, () => {
