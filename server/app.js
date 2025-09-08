@@ -45,7 +45,7 @@ const app = express();
 const server = createServer(app);
 
 const corseOption = {
-  origin: [process.env.CLIENT_URL],
+  origin: ['*'],
   credentials: true,
 };
 
