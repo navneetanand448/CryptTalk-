@@ -45,8 +45,8 @@ const app = express();
 const server = createServer(app);
 
 const corseOption = {
-  origin: ['*'],
-  credentials: true,
+  origin: "https://crypt-front.vercel.app", 
+  credentials: true, 
 };
 
 const io = new Server(server, {
@@ -57,9 +57,22 @@ console.log(corseOption);
 app.set("io", io);
 
 //using midddlewares here
+
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corseOption));
+
+//logging the request
+app.use((req, res, next) => {
+  console.log("----- Incoming Request -----");
+  console.log("Method:", req.method);
+  console.log("URL:", req.originalUrl);
+  console.log("Headers:", req.headers);
+  if (req.body) console.log("Body:", req.body);
+  console.log("---------------------------\n");
+  next(); 
+});
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/chat", chatRoute);
