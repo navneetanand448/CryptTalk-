@@ -59,7 +59,10 @@ console.log(corseOption);
 app.set("io", io);
 
 // ------------------- CUSTOM LOGGING -------------------
-const logFile = path.join(process.cwd(), "logs.txt");
+const logFile =
+  process.env.VERCEL === "1"
+    ? "/tmp/requests.log"
+    : path.join(process.cwd(), "requests.log");
 
 const originalLog = console.log;
 console.log = function (...args) {
