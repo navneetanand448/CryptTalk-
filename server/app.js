@@ -157,4 +157,5 @@ server.listen(PORT, () => {
   console.log(`server is listening on port ${PORT}`);
 });
 
+export default app;
 export { userSocketIDs };
