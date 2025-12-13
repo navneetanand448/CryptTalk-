@@ -5,9 +5,9 @@ import { v2 as cloudinary } from "cloudinary";
 import { getBase64, getSockets } from "../lib/helper.js";
 const cookieOptions = {
   maxAge: 15 * 24 * 60 * 60 * 1000, //15days
-  sameSite: "none",
+  sameSite: "lax",
   httpOnly: true,
-  secure: true,
+  secure: false,
 };
 
 // Function to clear all collections in the database

@@ -46,15 +46,15 @@ const app = express();
 
 const server = createServer(app);
 
-const corseOption = {
-  origin: "https://crypt-front.vercel.app", 
-  credentials: true, 
-};
+//const corseOption = {
+//  origin: "", 
+// credentials: true, 
+//};
 
 const io = new Server(server, {
-  cors: corseOption,
+  //cors: corseOption,
 });
-console.log(corseOption);
+//console.log(corseOption);
 
 app.set("io", io);
 
@@ -78,7 +78,7 @@ console.log = function (...args) {
 //using midddlewares here
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors(corseOption));
+//app.use(cors(corseOption));
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/chat", chatRoute);
@@ -102,13 +102,14 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const user = socket.user;
+  //console.log("User Connected: ", user._id)
   userSocketIDs.set(user._id.toString(), socket.id);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
     const recipients = members
       .filter(member => member._id !== user._id.toString())
-      .map(member => `${member.name} (ID: ${member._id})`);
-    console.log(`Message from ${user.name} (ID: ${user._id}) to chat ${chatId} (Recipients: ${recipients.join(", ")}): ${message || message}`);
+      .map(member => `${member.name}`);
+    console.log(`Message from ${user.name} to chat ${chatId} (Recipients: ${recipients.join(", ")}): ${message || message}`);
 
     const messageForRealTime = {
       content: message, 

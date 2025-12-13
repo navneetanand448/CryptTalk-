@@ -1,4 +1,0 @@
-[2025-09-08T21:50:48.930Z] server is listening on port 3000
-[2025-09-08T21:50:50.148Z] connected to DB:ac-5lo4g8z-shard-00-01.3ktoemw.mongodb.net
-[2025-09-08T22:00:39.112Z] server is listening on port 3000
-[2025-09-08T22:00:40.791Z] connected to DB:ac-5lo4g8z-shard-00-02.3ktoemw.mongodb.net

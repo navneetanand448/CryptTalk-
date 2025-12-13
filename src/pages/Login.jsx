@@ -104,9 +104,7 @@ const Login = () => {
                 onClick={() => setPrivacy(!privacy)}
                 style={{ cursor: "pointer" }}
               />
-              <div className="forgot">
-                <NavLink to="/reset">Forgot password?</NavLink>
-              </div>
+     
             </div>
             <div className="input">
               <input
